@@ -11,11 +11,22 @@ import javafx.stage.Stage;
 
 public class MainApp extends Application {
     private DatabaseManager dbManager;
+    private Scene mainScene;
+    private VBox mainMenuLayout;
 
     @Override
     public void start(Stage primaryStage) {
         dbManager = new DatabaseManager("test_survey.db");
 
+        mainMenuLayout = createMainMenu();
+        mainScene = new Scene(mainMenuLayout, 600, 400);
+        
+        primaryStage.setTitle("Survey System V1");
+        primaryStage.setScene(mainScene);
+        primaryStage.show();
+    }
+
+    private VBox createMainMenu() {
         VBox layout = new VBox(20);
         layout.setAlignment(Pos.CENTER);
         
@@ -25,15 +36,25 @@ public class MainApp extends Application {
         Button adminBtn = new Button("Enter as Admin");
         Button userBtn = new Button("Enter as User (Take Survey)");
 
-        adminBtn.setOnAction(e -> System.out.println("Admin clicked (WIP)"));
-        userBtn.setOnAction(e -> System.out.println("User clicked (WIP)"));
+        adminBtn.setOnAction(e -> showAdminView());
+        userBtn.setOnAction(e -> showUserView());
 
         layout.getChildren().addAll(title, adminBtn, userBtn);
-        
-        Scene scene = new Scene(layout, 600, 400);
-        primaryStage.setTitle("Survey System V1");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        return layout;
+    }
+
+    private void showAdminView() {
+        AdminDashboardView adminView = new AdminDashboardView(this::showMainMenuView, dbManager);
+        mainScene.setRoot(adminView.getView());
+    }
+
+    private void showUserView() {
+        UserPortalView userView = new UserPortalView(this::showMainMenuView, dbManager);
+        mainScene.setRoot(userView.getView());
+    }
+
+    private void showMainMenuView() {
+        mainScene.setRoot(mainMenuLayout);
     }
 
     public static void main(String[] args) {

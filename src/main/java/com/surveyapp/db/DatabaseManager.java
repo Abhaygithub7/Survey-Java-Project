@@ -52,4 +52,18 @@ public class DatabaseManager {
             System.err.println("Database seeding failed: " + e.getMessage());
         }
     }
+
+    public java.util.List<String> getAllSurveyTitles() {
+        java.util.List<String> titles = new java.util.ArrayList<>();
+        String query = "SELECT title FROM surveys ORDER BY id ASC";
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+            java.sql.ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                titles.add(rs.getString("title"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Failed to fetch surveys: " + e.getMessage());
+        }
+        return titles;
+    }
 }
