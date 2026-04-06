@@ -24,4 +24,18 @@ public class AnalysisService {
         if (negCount > posCount) return "Negative";
         return "Neutral";
     }
+
+    public double calculateAverageRating(java.util.List<String> ratings) {
+        if (ratings == null || ratings.isEmpty()) return 0.0;
+        
+        double sum = 0;
+        int count = 0;
+        for (String r : ratings) {
+            try {
+                sum += Double.parseDouble(r);
+                count++;
+            } catch (NumberFormatException ignored) {}
+        }
+        return count == 0 ? 0.0 : sum / count;
+    }
 }
