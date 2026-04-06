@@ -2,8 +2,10 @@ package com.surveyapp.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import com.surveyapp.model.Question;
 
 public class DatabaseManager {
     private final String url;
@@ -65,5 +67,62 @@ public class DatabaseManager {
             System.err.println("Failed to fetch surveys: " + e.getMessage());
         }
         return titles;
+    }
+
+    public int getSurveyIdByTitle(String title) {
+        String query = "SELECT id FROM surveys WHERE title = ?";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, title);
+            java.sql.ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getInt("id");
+        } catch (SQLException e) {
+            System.err.println("Failed to fetch survey ID: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    public java.util.List<Question> getQuestionsForSurvey(int surveyId) {
+        java.util.List<Question> questions = new java.util.ArrayList<>();
+        String query = "SELECT id, question_text, question_type FROM questions WHERE survey_id = ? ORDER BY id ASC";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, surveyId);
+            java.sql.ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                questions.add(new Question(
+                    rs.getInt("id"), surveyId, 
+                    rs.getString("question_text"), rs.getString("question_type")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Failed to fetch questions: " + e.getMessage());
+        }
+        return questions;
+    }
+
+    public void saveResponse(int surveyId, int questionId, String responseValue) {
+        String query = "INSERT INTO responses (survey_id, question_id, response_value) VALUES (?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, surveyId);
+            pstmt.setInt(2, questionId);
+            pstmt.setString(3, responseValue);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Failed to save response: " + e.getMessage());
+        }
+    }
+
+    public java.util.List<String> getResponsesForQuestion(int questionId) {
+        java.util.List<String> responses = new java.util.ArrayList<>();
+        String query = "SELECT response_value FROM responses WHERE question_id = ?";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, questionId);
+            java.sql.ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                responses.add(rs.getString("response_value"));
+            }
+        } catch (SQLException e) {
+            System.err.println("Failed to fetch responses: " + e.getMessage());
+        }
+        return responses;
     }
 }
