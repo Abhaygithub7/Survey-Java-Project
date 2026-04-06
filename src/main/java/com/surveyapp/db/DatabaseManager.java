@@ -26,8 +26,30 @@ public class DatabaseManager {
             stmt.execute(surveysTable);
             stmt.execute(questionsTable);
             stmt.execute(responsesTable);
+            seedInitialData(conn);
         } catch (SQLException e) {
             System.err.println("Database initialization failed: " + e.getMessage());
+        }
+    }
+
+    private void seedInitialData(Connection conn) {
+        String countCheck = "SELECT COUNT(*) AS total FROM surveys;";
+        try (Statement stmt = conn.createStatement()) {
+            java.sql.ResultSet rs = stmt.executeQuery(countCheck);
+            if (rs.next() && rs.getInt("total") == 0) {
+                // Seed UEFA
+                stmt.execute("INSERT INTO surveys (id, title, description) VALUES (1, 'UEFA Champions League Feedback', 'Tell us about your favorite teams and matches.');");
+                stmt.execute("INSERT INTO questions (survey_id, question_text, question_type, options) VALUES (1, 'How excited are you for the knockout stages?', 'RATING', null);");
+                stmt.execute("INSERT INTO questions (survey_id, question_text, question_type, options) VALUES (1, 'Which team do you think will win?', 'TEXT', null);");
+                
+                // Seed Tech Clubs
+                stmt.execute("INSERT INTO surveys (id, title, description) VALUES (2, 'College Tech Club Survey', 'Help us improve the computer science and robotics clubs.');");
+                stmt.execute("INSERT INTO questions (survey_id, question_text, question_type, options) VALUES (2, 'How would you rate the current workshops?', 'RATING', null);");
+                stmt.execute("INSERT INTO questions (survey_id, question_text, question_type, options) VALUES (2, 'What other topics should we cover?', 'TEXT', null);");
+                System.out.println("Seeded database with sample surveys.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Database seeding failed: " + e.getMessage());
         }
     }
 }
