@@ -125,4 +125,16 @@ public class DatabaseManager {
         }
         return responses;
     }
+
+    public void addQuestion(int surveyId, String questionText, String questionType) {
+        String query = "INSERT INTO questions (survey_id, question_text, question_type, options) VALUES (?, ?, ?, null)";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, surveyId);
+            pstmt.setString(2, questionText);
+            pstmt.setString(3, questionType);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Failed to add question: " + e.getMessage());
+        }
+    }
 }

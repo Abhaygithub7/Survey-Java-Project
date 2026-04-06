@@ -4,7 +4,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ComboBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 
 import java.util.List;
 import com.surveyapp.db.DatabaseManager;
@@ -91,8 +96,43 @@ public class AdminDashboardView {
             container.getChildren().addAll(qLabel, analyticsLabel);
         }
 
+        // --- NEW AUTHORING FORM ---
+        VBox addQuestionBox = new VBox(10);
+        addQuestionBox.setStyle("-fx-border-color: #ccc; -fx-border-width: 1px; -fx-padding: 10px; -fx-background-color: #f9f9f9;");
+        addQuestionBox.setAlignment(Pos.CENTER);
+
+        Label addTitle = new Label("Add a New Question");
+        addTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: #333;");
+
+        HBox inputRow = new HBox(10);
+        inputRow.setAlignment(Pos.CENTER);
+        
+        TextField newQuestionInput = new TextField();
+        newQuestionInput.setPromptText("Enter question text...");
+        newQuestionInput.setPrefWidth(300);
+
+        ComboBox<String> typeCb = new ComboBox<>();
+        typeCb.getItems().addAll("TEXT", "RATING");
+        typeCb.setValue("TEXT");
+
+        Button submitNewQuestionBtn = new Button("Add");
+        submitNewQuestionBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;");
+        submitNewQuestionBtn.setOnAction(e -> {
+            String text = newQuestionInput.getText();
+            String type = typeCb.getValue();
+            if (text != null && !text.trim().isEmpty()) {
+                dbManager.addQuestion(surveyId, text, type);
+                // Refresh the view
+                loadSurveyAnalytics(container, titleText);
+            }
+        });
+
+        inputRow.getChildren().addAll(newQuestionInput, typeCb, submitNewQuestionBtn);
+        addQuestionBox.getChildren().addAll(addTitle, inputRow);
+
         Button backToSurveys = new Button("View Other Surveys");
         backToSurveys.setOnAction(evt -> loadSurveyList(container));
-        container.getChildren().add(backToSurveys);
+        
+        container.getChildren().addAll(addQuestionBox, backToSurveys);
     }
 }
